@@ -65,7 +65,7 @@ def preprocess_corpus(filename):
 def postprocess_output(s):
     s = re.sub('\\s+([.,!?])\\s*', r'\1 ', s)                       # correct whitespace padding around punctuation
     s = s.capitalize();                                             # capitalize first letter
-    s = re.sub('([.!?]\\s+[a-z])', lambda c: c.group(1).upper(), s) # capitalize letters following terminated sentences
+    s = re.sub('([.!?]\\s+[a-z])', lambda c: '\n' + c.group(1).upper(), s) # capitalize letters following terminated sentences
     return s
 
 
@@ -75,18 +75,26 @@ def gengram_sentence(corpus, N=3, sentence_count=5, start_seq=None):
     ngrams = make_ngrams(corpus.split(SEP), N)
     counts = ngram_freqs(ngrams)
 
+
     if start_seq is None: start_seq = random.choice(counts.keys());
     rand_text = start_seq.lower();
+
 
     sentences = 0;
     while sentences < sentence_count:
         rand_text += SEP + next_word(rand_text, N, counts);
-        sentences += 1 if rand_text.endswith(('.','!', '?')) else 0
+        if rand_text.endswith(('.','!', '?',',')):
+            # print(rand_text)
+            sentences += 1
+
 
     return postprocess_output(rand_text);
 
 
 if __name__ == "__main__":
 
-    corpus = preprocess_corpus("corpus.txt")
-    print gengram_sentence(corpus, start_seq="Today we")
+    # corpus = preprocess_corpus("corpus.txt")
+    # print(gengram_sentence(corpus, start_seq="Once again"))
+
+    corpus = preprocess_corpus("hillsong.txt")
+    print(gengram_sentence(corpus, start_seq="whole earth", sentence_count=10))
